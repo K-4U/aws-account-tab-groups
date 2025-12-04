@@ -46,7 +46,7 @@ jobs:
           filename: "{name}-{version}.zip"
       
       - name: Submit to Firefox Add-ons
-        uses: browser-actions/release-firefox-addon@v1
+        uses: browser-actions/release-firefox-addon@latest
         with:
           addon-id: ${{ secrets.FIREFOX_ADDON_ID }}
           auth-api-issuer: ${{ secrets.AUTH_API_ISSUER }}
