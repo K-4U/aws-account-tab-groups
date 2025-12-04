@@ -16,6 +16,7 @@ function extractRoleFromPage() {
     const hash = window.location.hash;
     const hashParams = new URLSearchParams(hash.includes('?') ? hash.split('?')[1] : '');
     const roleParam = hashParams.get('role_name');
+    const accountId = hashParams.get('account_id');
     
     if (roleParam) {
       const decodedRole = decodeURIComponent(roleParam);
@@ -30,9 +31,17 @@ function extractRoleFromPage() {
         return { roleName, environment };
       }
       
-      // Fallback: just use the whole thing as role name
+      // Use role name as-is
       roleName = decodedRole.replace(/[@]$/, ''); // Remove trailing @
-      console.log('Using full role name:', roleName);
+      console.log('Using role name:', roleName);
+      
+      // Use account_id as environment if available
+      if (accountId) {
+        environment = accountId;
+        console.log('Using account_id as environment:', environment);
+      }
+      
+      return { roleName, environment };
     }
   }
   
@@ -141,12 +150,12 @@ function detectAWSLogin() {
     
     const result = extractRoleFromPage();
     
-    if (result && result.roleName && result.environment) {
-      console.log('AWS role and environment found:', result);
+    if (result && result.roleName) {
+      console.log('AWS role found:', result);
       notifyBackgroundScript(result.roleName, result.environment);
       return;
     } else {
-      console.log('Role/environment not yet available in SSO portal, will retry...');
+      console.log('Role not yet available in SSO portal, will retry...');
     }
   }
 }
@@ -185,11 +194,11 @@ browser.runtime.onMessage.addListener((message) => {
     if (window.location.href.includes('awsapps.com')) {
       console.log('Extracting role and environment info on request from SSO portal...');
       const result = extractRoleFromPage();
-      if (result && result.roleName && result.environment) {
-        console.log('Found role and environment:', result);
+      if (result && result.roleName) {
+        console.log('Found role:', result);
         notifyBackgroundScript(result.roleName, result.environment);
       } else {
-        console.log('No role/environment found yet in SSO portal');
+        console.log('No role found yet in SSO portal');
       }
     }
   }
@@ -214,7 +223,7 @@ if (window.location.href.includes('awsapps.com')) {
   const observer = new MutationObserver(() => {
     if (!hasNotified) {
       const result = extractRoleFromPage();
-      if (result && result.roleName && result.environment) {
+      if (result && result.roleName) {
         console.log('Role detected via mutation observer:', result);
         notifyBackgroundScript(result.roleName, result.environment);
       }

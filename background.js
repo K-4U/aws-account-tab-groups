@@ -49,7 +49,7 @@ async function saveMappings() {
 // Get or create tab group for role
 async function getOrCreateTabGroup(environment, roleName, tabId) {
   try {
-    const groupKey = `${environment} - ${roleName}`;
+    const groupKey = environment ? `${environment} - ${roleName}` : roleName;
     
     // Check if we already have a group for this env-role combination
     if (roleGroupMappings[groupKey]) {
@@ -108,7 +108,7 @@ async function getOrCreateTabGroup(environment, roleName, tabId) {
 // Move tab to role group
 async function moveTabToRoleGroup(tabId, environment, roleName) {
   try {
-    const groupKey = `${environment} - ${roleName}`;
+    const groupKey = environment ? `${environment} - ${roleName}` : roleName;
     console.log(`Moving tab ${tabId} to group: ${groupKey}`);
     
     const tab = await browser.tabs.get(tabId);
