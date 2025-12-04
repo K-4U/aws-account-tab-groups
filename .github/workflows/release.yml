@@ -65,7 +65,7 @@ jobs:
           auth-api-issuer: ${{ secrets.AUTH_API_ISSUER }}
           auth-api-secret: ${{ secrets.AUTH_API_SECRET }}
           addon-path: ${{ steps.web-ext-build.outputs.target }}
-          release-notes: ${{ steps.get_release.outputs.notes }}
+          release-note: ${{ steps.get_release.outputs.notes }}
       
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
