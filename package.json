@@ -1,5 +1,5 @@
 {
-  "name": "aws-sso-tab-grouper",
+  "name": "aws-tab-grouper",
   "version": "1.0.0",
   "description": "Firefox extension to group AWS Console tabs by SSO role and environment",
   "scripts": {
@@ -17,6 +17,6 @@
     "sso",
     "tab-groups"
   ],
-  "author": "",
+  "author": "Koen Beckers (K4Unl)",
   "license": "MIT"
 }

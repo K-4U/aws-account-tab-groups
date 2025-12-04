@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "AWS SSO Tab Grouper",
+  "name": "AWS Tab Grouper",
   "version": "1.0.0",
   "description": "Automatically groups tabs by AWS SSO role name when logging in with awsapps",
   "icons": {
@@ -9,7 +9,7 @@
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "aws-sso-tab-grouper@koenbeckers.dev",
+      "id": "aws-tab-grouper@koenbeckers.dev",
       "strict_min_version": "139.0",
       "data_collection_permissions": {
         "required": ["none"]
