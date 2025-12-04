@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 300px;
+      padding: 15px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+    }
+    
+    h2 {
+      margin-top: 0;
+      font-size: 16px;
+      color: #333;
+    }
+    
+    .status {
+      padding: 10px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      margin-bottom: 15px;
+    }
+    
+    .role-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .role-item {
+      padding: 8px;
+      margin-bottom: 5px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .role-name {
+      font-weight: 500;
+      color: #0066cc;
+    }
+    
+    .tab-count {
+      background: #0066cc;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+    
+    .no-roles {
+      color: #666;
+      font-style: italic;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+      background: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    button:hover {
+      background: #0052a3;
+    }
+    
+    .info {
+      font-size: 12px;
+      color: #666;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h2>🔐 AWS SSO Tab Grouper</h2>
+  
+  <div class="status">
+    <div id="current-role">
+      <strong>Current Role:</strong> <span id="role-name">Not detected</span>
+    </div>
+  </div>
+  
+  <div>
+    <h3 style="font-size: 14px; margin-bottom: 10px;">Active Role Groups:</h3>
+    <ul class="role-list" id="role-list">
+      <li class="no-roles">No role groups yet</li>
+    </ul>
+  </div>
+  
+  <button id="refresh-btn">Refresh</button>
+  
+  <div class="info">
+    This extension automatically groups your AWS tabs by role name when you log in via AWS SSO.
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

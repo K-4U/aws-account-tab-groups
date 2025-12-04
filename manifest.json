@@ -1,0 +1,53 @@
+{
+  "manifest_version": 2,
+  "name": "AWS SSO Tab Grouper",
+  "version": "1.0.0",
+  "description": "Automatically groups tabs by AWS SSO role name when logging in with awsapps",
+  "icons": {
+    "48": "icons/icon-48.png",
+    "96": "icons/icon-96.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "aws-sso-tab-grouper@koenbeckers.dev",
+      "strict_min_version": "139.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
+  "permissions": [
+    "tabs",
+    "tabGroups",
+    "storage",
+    "cookies",
+    "webRequest",
+    "webRequestBlocking",
+    "*://*.awsapps.com/*",
+    "*://*.amazonaws.com/*",
+    "*://console.aws.amazon.com/*",
+    "*://*.console.aws.amazon.com/*"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.awsapps.com/*",
+        "*://console.aws.amazon.com/*",
+        "*://*.console.aws.amazon.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "browser_action": {
+    "default_icon": {
+      "48": "icons/icon-48.png"
+    },
+    "default_title": "AWS SSO Tab Grouper",
+    "default_popup": "popup.html"
+  }
+}

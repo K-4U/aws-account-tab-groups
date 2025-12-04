@@ -1,0 +1,35 @@
+name: Build Extension
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Lint extension
+        uses: kewisch/action-web-ext@v1
+        with:
+          cmd: lint
+          source: .
+      
+      - name: Build extension
+        id: web-ext-build
+        uses: kewisch/action-web-ext@v1
+        with:
+          cmd: build
+          source: .
+          filename: "{name}-{version}.zip"
+        
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-build
+          path: ${{ steps.web-ext-build.outputs.target }}
+          retention-days: 30

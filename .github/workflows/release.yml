@@ -1,0 +1,69 @@
+name: Release and Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+      
+      - name: Update version in manifest.json and package.json
+        uses: jossef/action-set-json-field@v2.1
+        with:
+          file: manifest.json
+          field: version
+          value: ${{ steps.get_version.outputs.version }}
+      
+      - name: Update package.json version
+        uses: jossef/action-set-json-field@v2.1
+        with:
+          file: package.json
+          field: version
+          value: ${{ steps.get_version.outputs.version }}
+      
+      - name: Build extension with web-ext
+        id: web-ext-build
+        uses: kewisch/action-web-ext@v1
+        with:
+          cmd: build
+          source: .
+          filename: "{name}-{version}.zip"
+      
+      - name: Submit to Firefox Add-ons
+        uses: browser-actions/release-firefox-addon@v1
+        with:
+          addon-id: ${{ secrets.FIREFOX_ADDON_ID }}
+          auth-api-issuer: ${{ secrets.WEB_EXT_API_KEY }}
+          auth-api-secret: ${{ secrets.WEB_EXT_API_SECRET }}
+          addon-path: ${{ steps.web-ext-build.outputs.target }}
+      
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.web-ext-build.outputs.target }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Commit version updates
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add manifest.json package.json
+          git commit -m "chore: bump version to ${{ steps.get_version.outputs.version }}" || echo "No changes to commit"
+          git push origin HEAD:main || echo "Could not push to main"
