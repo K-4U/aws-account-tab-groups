@@ -67,17 +67,38 @@ function extractRoleFromPage() {
   if (window.location.href.includes('console.aws.amazon.com')) {
     console.log('AWS Console page detected, attempting to extract role...');
     
-    // Extract from subdomain if we don't have environment yet
-    // Pattern: account-env.region.console.aws.amazon.com
-    const hostnameMatch = window.location.hostname.match(/^(\d+)-([^.]+)\./);
-    if (hostnameMatch && !environment) {
-      environment = hostnameMatch[2];
-      console.log('Found environment in hostname:', environment);
+    // Try to get role from various console elements FIRST
+    // Method 1: Look for role in the user menu dropdown (most reliable)
+    const roleSelectors = [
+      '[data-testid="awsc-nav-account-menu-button"]',
+      '#nav-usernameMenu',
+      '[data-testid="awsc-username"]',
+      '.awsc-username',
+      'button[aria-label*="profile"]'
+    ];
+    
+    for (const selector of roleSelectors) {
+      const element = document.querySelector(selector);
+      if (element) {
+        const text = element.textContent || element.innerText || element.getAttribute('aria-label') || '';
+        console.log('Checking element:', selector, 'Text:', text);
+        
+        // Pattern: RoleName / AccountName or RoleName @ AccountName
+        const roleMatch = text.match(/([A-Za-z0-9_-]+)\s*[/@]\s*([A-Za-z0-9_-]+)/);
+        if (roleMatch) {
+          roleName = roleMatch[1];
+          // Use account name/ID as environment if we don't have one
+          if (!environment) {
+            environment = roleMatch[2];
+          }
+          console.log('Found role in user menu:', roleName, 'env:', environment);
+          return { roleName, environment };
+        }
+      }
     }
     
-    // Try to get role from various console elements
+    // Method 2: Check URL hash for role
     if (!roleName) {
-      // Method 1: Check URL hash for role
       const hashMatch = window.location.hash.match(/role\/([^/]+)/);
       if (hashMatch) {
         roleName = hashMatch[1];
@@ -85,40 +106,19 @@ function extractRoleFromPage() {
       }
     }
     
-    // Method 2: Look for role in the user menu dropdown
-    if (!roleName) {
-      const roleSelectors = [
-        '[data-testid="awsc-nav-account-menu-button"]',
-        '#nav-usernameMenu',
-        '[data-testid="awsc-username"]',
-        '.awsc-username'
-      ];
-      
-      for (const selector of roleSelectors) {
-        const element = document.querySelector(selector);
-        if (element) {
-          const text = element.textContent || element.innerText;
-          // Pattern: RoleName / Account or RoleName@Account
-          const roleMatch = text.match(/([A-Za-z0-9_-]+)\s*[/@]\s*[A-Za-z0-9]/);
-          if (roleMatch) {
-            roleName = roleMatch[1];
-            console.log('Found role in user menu:', roleName);
-            break;
-          }
-        }
-      }
-    }
-    
     // Method 3: Check the top navigation bar
     if (!roleName) {
-      const navElements = document.querySelectorAll('nav span, nav div');
+      const navElements = document.querySelectorAll('nav span, nav div, header span, header div');
       for (const element of navElements) {
         const text = element.textContent || element.innerText;
-        if (text.includes('/')) {
-          const parts = text.split('/');
-          if (parts.length >= 2 && parts[0].trim().length > 0) {
+        if (text.includes('/') || text.includes('@')) {
+          const parts = text.split(/[/@]/);
+          if (parts.length >= 2 && parts[0].trim().length > 3) {
             roleName = parts[0].trim();
-            console.log('Found role in navigation:', roleName);
+            if (!environment && parts[1].trim().length > 0) {
+              environment = parts[1].trim();
+            }
+            console.log('Found role in navigation:', roleName, 'env:', environment);
             break;
           }
         }
@@ -127,19 +127,33 @@ function extractRoleFromPage() {
     
     // Method 4: Document title
     if (!roleName) {
-      const titleMatch = document.title.match(/([A-Za-z0-9_-]+)\s*\/\s*AWS/);
+      const titleMatch = document.title.match(/([A-Za-z0-9_-]+)\s*[/@]\s*([A-Za-z0-9_-]+)/);
       if (titleMatch) {
         roleName = titleMatch[1];
-        console.log('Found role in document title:', roleName);
+        if (!environment) {
+          environment = titleMatch[2];
+        }
+        console.log('Found role in document title:', roleName, 'env:', environment);
       }
     }
     
-    if (roleName && environment) {
+    // Extract from subdomain as LAST resort for environment
+    if (!environment) {
+      // Pattern: account-env.region.console.aws.amazon.com or accountid.region.console.aws.amazon.com
+      const hostnameMatch = window.location.hostname.match(/^(\d+)(?:-([^.]+))?\./);
+      if (hostnameMatch) {
+        environment = hostnameMatch[2] || hostnameMatch[1]; // Use suffix or account ID
+        console.log('Found environment in hostname:', environment);
+      }
+    }
+    
+    // Return whatever we found
+    if (roleName) {
       return { roleName, environment };
     }
   }
   
-  return roleName && environment ? { roleName, environment } : null;
+  return roleName ? { roleName, environment } : null;
 }
 
 // Detect AWS SSO login completion
@@ -200,6 +214,24 @@ browser.runtime.onMessage.addListener((message) => {
       } else {
         console.log('No role found yet in SSO portal');
       }
+    }
+  }
+  
+  if (message.type === 'EXTRACT_ROLE_FROM_CONSOLE') {
+    // Extract from AWS Console page
+    if (window.location.href.includes('console.aws.amazon.com')) {
+      console.log('Extracting role from AWS Console page...');
+      
+      // Wait a bit for the page to fully load
+      setTimeout(() => {
+        const result = extractRoleFromPage();
+        if (result && result.roleName) {
+          console.log('Found role in console:', result);
+          notifyBackgroundScript(result.roleName, result.environment);
+        } else {
+          console.log('Could not extract role from console page');
+        }
+      }, 1000);
     }
   }
 });

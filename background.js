@@ -200,8 +200,15 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         
         // Mark as processed so we don't try to group it again
         tabsProcessed[tabId] = true;
+      } else {
+        // Try to extract role from the console page itself
+        console.log(`No stored role info for tab ${tabId}, requesting extraction from console page`);
+        try {
+          await browser.tabs.sendMessage(tabId, { type: 'EXTRACT_ROLE_FROM_CONSOLE' });
+        } catch (error) {
+          console.log('Could not send message to console tab:', error.message);
+        }
       }
-      // Don't try to extract from console page - only use stored info from SSO portal
     }
   }
 });
