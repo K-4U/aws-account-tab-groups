@@ -3,6 +3,11 @@
   "name": "AWS Tab Grouper",
   "version": "1.0.0",
   "description": "Automatically groups tabs by AWS SSO role name when logging in with awsapps",
+  "author": "Koen Beckers (K4Unl)",
+  "developer": {
+    "name": "Koen Beckers",
+    "url": "https://koenbeckers.dev"
+  },
   "icons": {
     "48": "icons/icon-48.png",
     "96": "icons/icon-96.png"

@@ -23,6 +23,19 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
       
+      - name: Get release notes
+        id: get_release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get the release body/notes
+          RELEASE_NOTES=$(gh release view "${{ github.ref_name }}" --json body --jq .body)
+          # Escape quotes and newlines for JSON
+          RELEASE_NOTES="${RELEASE_NOTES//\\/\\\\}"
+          RELEASE_NOTES="${RELEASE_NOTES//\"/\\\"}"
+          RELEASE_NOTES="${RELEASE_NOTES//$'\n'/\\n}"
+          echo "notes=$RELEASE_NOTES" >> $GITHUB_OUTPUT
+      
       - name: Update version in manifest.json and package.json
         uses: jossef/action-set-json-field@v2.1
         with:
@@ -52,6 +65,7 @@ jobs:
           auth-api-issuer: ${{ secrets.AUTH_API_ISSUER }}
           auth-api-secret: ${{ secrets.AUTH_API_SECRET }}
           addon-path: ${{ steps.web-ext-build.outputs.target }}
+          release-notes: ${{ steps.get_release.outputs.notes }}
       
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
