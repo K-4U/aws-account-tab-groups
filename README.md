@@ -1,3 +1,10 @@
+
+[![Build Extension](https://github.com/K-4U/aws-account-tab-groups/actions/workflows/build.yml/badge.svg)](https://github.com/K-4U/aws-account-tab-groups/actions/workflows/build.yml)
+[![Release and Publish](https://github.com/K-4U/aws-account-tab-groups/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/K-4U/aws-account-tab-groups/actions/workflows/release.yml)
+![GitHub Release](https://img.shields.io/github/v/release/K-4U/aws-account-tab-groups?display_name=release&logo=github&link=https%3A%2F%2Fgithub.com%2FK-4U%2Faws-account-tab-groups%2Freleases)
+![Mozilla Add-on Users](https://img.shields.io/amo/users/aws-tab-grouper?logo=firefoxbrowser&link=https%3A%2F%2Faddons.mozilla.org%2Fnl%2Ffirefox%2Faddon%2Faws-tab-grouper%2F)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/K-4U/aws-account-tab-groups/total?logo=github)
+
 # AWS SSO Tab Grouper for Firefox
 
 A Firefox browser extension that automatically detects AWS SSO (awsapps) login sessions and groups all tabs from that session together by AWS role name.
@@ -30,7 +37,7 @@ A Firefox browser extension that automatically detects AWS SSO (awsapps) login s
 
 ### From Firefox Add-ons (When Published)
 
-*Coming soon to Firefox Add-ons marketplace*
+[https://addons.mozilla.org/nl/firefox/addon/aws-tab-grouper/](https://addons.mozilla.org/nl/firefox/addon/aws-tab-grouper/)
 
 ## Usage
 
